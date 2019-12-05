@@ -6,7 +6,8 @@ import "./index.css";
 
 const Alerts = props => {
   const [alerts, setAlerts] = useState([]);
-  const [ws] = useState(new WebSocket("ws://mapalertunifapapi.herokuapp.com/ws/alertas/todos/"));
+  var ws_scheme = window.location.protocol == "https" ? "wss" : "ws"
+  const [ws] = useState(new WebSocket(ws_scheme + "://mapalertunifapapi.herokuapp.com/ws/alertas/todos/"));
 
   useEffect(() => {
     async function carregarAlertas() {
