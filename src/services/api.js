@@ -1,5 +1,5 @@
 import axios from "axios";
-import { getToken, login } from "./auth";
+import { getToken } from "./auth";
 
 const baseURL = "https://mapalertunifapapi.herokuapp.com";
 //const baseURL = "http://192.168.1.102:8000";
