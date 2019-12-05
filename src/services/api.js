@@ -1,8 +1,8 @@
 import axios from "axios";
 import { getToken, login } from "./auth";
 
-//const baseURL = "https://mapalertunifapapi.herokuapp.com";
 const baseURL = "https://mapalertunifapapi.herokuapp.com";
+//const baseURL = "http://192.168.1.102:8000";
 
 axios.interceptors.request.use(async config => {
   const token = getToken();
@@ -15,24 +15,20 @@ axios.interceptors.request.use(async config => {
 class AxiosRequest {
   // DEFAULT GET REQUEST
   static async defaultGet({ path = "", id = "" } = {}) {
-    try {
-      const response = await axios.get(
-        id ? `${baseURL}${path}${id}/` : `${baseURL}${path}`
-      );
-      return response.data;
-    } catch (error) {
-      return error;
-    }
+
+    const response = await axios.get(
+      id ? `${baseURL}${path}${id}/` : `${baseURL}${path}`
+    );
+    return response.data;
+
   }
 
   // DEFAULT POST REQUEST
   static async defaultPost({ path = "", data = {} } = {}) {
-    try {
-      const response = await axios.post(`${baseURL}${path}`, data);
-      return response.data;
-    } catch (error) {
-      return error;
-    }
+
+    const response = await axios.post(`${baseURL}${path}`, data);
+    return response.data;
+
   }
 
   //
@@ -63,13 +59,6 @@ class AxiosRequest {
       path: "/auth/jwt/create",
       data: data
     });
-    if (response.access) {
-      const { access, refresh } = response;
-      login(access, refresh);
-    } else {
-      console.error("Erro ao logar");
-    }
-
     return response;
   }
 
@@ -125,18 +114,13 @@ class AxiosRequest {
     return await AxiosRequest.defaultPost({ path: "/api/alert/", data: data });
   }
 
-  async putAlert({
-    id = "",
-    descricao = "",
-    prazo = null,
-    status = ""
-  } = {}) {
+  async putAlert({ id = "", prazo = null, status = "", feedback = null } = {}) {
     try {
       const response = await axios.put(`${baseURL}/api/alert/${id}/`, {
         id: id,
-        descricao: descricao,
         prazo: prazo,
-        status: status
+        status: status,
+        feedback: feedback
       });
       return response.data;
     } catch (error) {

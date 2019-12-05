@@ -1,56 +1,71 @@
 import React from "react";
 import Header from "../../components/Header";
 import Badge from "../../components/Badge";
+import Details from "../../components/Details";
 import AxiosRequest from "../../services/api";
-import './styles.css';
-export default class IndividualAlert extends React.Component {
-  state = {};
+import { Button } from "react-bootstrap";
 
-  async componentDidMount() {
+import "./styles.css";
+export default class IndividualAlert extends React.Component {
+  state = {
+    showModal: false
+  };
+
+  _getAlert = async () => {
     const { handle } = this.props.match.params;
     try {
-      const response = await AxiosRequest.getAlert({ id: handle });
-      const {
-        id,
-        latitude,
-        longitude,
-        descricao,
-        status,
+      const response = await AxiosRequest.getAlert({
+        id: handle
+      });
+
+      let {
+        prazo,
         created_at,
+        feedback,
         local: { nome },
-        owner: { username },
-        image
+        owner: { username }
       } = response;
       const tipoNome = response.tipo.nome;
-      const data = new Date(created_at).toLocaleString();
-
+      created_at = new Date(created_at).toLocaleString();
+      if (feedback == null) feedback = "";
       this.setState({
-        id: id,
-        longitude: longitude,
-        latitude: latitude,
-        descricao: descricao,
+        id: response.id,
+        longitude: response.longitude,
+        latitude: response.latitude,
+        descricao: response.descricao,
         local: nome,
         tipo: tipoNome,
-        status: status,
+        status: response.status,
         owner: username,
-        image: image,
-        created_at: data
+        image: response.image,
+        created_at: created_at,
+        prazo: prazo,
+        feedback: feedback
       });
     } catch (err) {
       this.props.history.push("/error404");
     }
-  }
-  async marcarResolvido(status) {
-    const response = await AxiosRequest.putAlert({
-      'id': this.state.id,
-      'status': status
-    })
+  };
 
+  componentDidMount() {
+    this._getAlert();
+  }
+
+  async submitChanges(feedback, status, prazo) {
+    const response = await AxiosRequest.putAlert({
+      id: this.state.id,
+      feedback: feedback,
+      prazo: prazo,
+      status: status
+    });
 
     this.setState({
       status: response.status
-    })
+    });
   }
+
+  handleOpen = () => this.setState({ showModal: true });
+  handleClose = () => this.setState({ showModal: false });
 
   render() {
     return (
@@ -74,19 +89,7 @@ export default class IndividualAlert extends React.Component {
                   </footer>
                 </blockquote>
                 <div className="h-100 d-flex flex-row align-items-end">
-                  <button
-                    className="btn btn-success"
-                    onClick={() => this.marcarResolvido(1)}
-                  >
-                    Resolvido
-                  </button>
-                  <button
-                    className="btn btn-outline-warning"
-                    style={{ marginLeft: "5px" }}
-                    onClick={() => this.marcarResolvido(2)}
-                  >
-                    Não será resolvido
-                  </button>
+                  <Button onClick={this.handleOpen}>Responder</Button>
                 </div>
               </div>
               <div
@@ -101,6 +104,14 @@ export default class IndividualAlert extends React.Component {
               </div>
             </div>
           </div>
+          {this.state.showModal && (
+            <Details
+              handleClose={this.handleClose}
+              showModal={this.state.showModal}
+              getAlert={this._getAlert}
+              {...this.state}
+            />
+          )}
         </div>
       </div>
     );

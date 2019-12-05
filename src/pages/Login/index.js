@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import AxiosRequest from "../../services/api";
+import { login } from '../../services/auth';
 import { withRouter } from "react-router-dom";
-
+import logo from './logo.png';
+import './style.css';
 const Login = props => {
   const [usernameInput, setUsername] = useState("");
   const [passwordInput, setPassword] = useState("");
@@ -20,17 +22,21 @@ const Login = props => {
 
   const handleSubmit = async event => {
     event.preventDefault();
-    if (!usernameInput || !setPassword) {
-      setErrors("Preencha todos os dados (username, password)");
+    if (!usernameInput || !passwordInput) {
+      setErrors("Preencha todos os campos.");
     } else {
       try {
         const response = await AxiosRequest.login({
           user: usernameInput,
           passwd: passwordInput
         });
+        if (response.access) {
+          const { access, refresh } = response;
+          login(access, refresh);
+        }
         props.history.push("/alertas");
       } catch (err) {
-        console.log(err);
+        setErrors("Email ou senha não existem.");
       }
     }
   };
@@ -39,6 +45,12 @@ const Login = props => {
     <div className="d-flex flex-column justify-content-center align-items-center h-100">
       <div className="card" style={{ width: "18rem" }}>
         <div className="card-body">
+          <div className="text-center">
+            <img src={logo}
+              alt="Map Alert"
+              style={{ width: "100px", margin: "10px 0px 40px" }} />
+            {Errors && <p className="border rounded border-danger error">{Errors}</p>}
+          </div>
           <form onSubmit={handleSubmit}>
             <div className="form-group">
               <input
